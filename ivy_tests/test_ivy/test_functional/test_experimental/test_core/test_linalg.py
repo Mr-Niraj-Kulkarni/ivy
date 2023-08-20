@@ -1610,3 +1610,42 @@ def test_tucker_tensorly(tol_norm_2, tol_max_abs, shape, ranks):
         ivy.max(ivy.abs(rec_svd - rec_random)) < tol_max_abs,
         "abs norm of difference between svd and random init too high",
     )
+
+
+@st.composite
+def _randomized_range_finder_data(draw):
+    _, x = draw(
+        helpers.dtype_and_values(
+            dtypes=["float32"],
+            min_num_dims=2,
+            max_num_dims=2,
+            min_dim_size=2,
+            max_dim_size=6,
+            min_value=0.2,
+            max_value=10.0,
+        )
+    )
+    n_dims = draw(helpers.ints(min_value=2, max_value=5))
+    n_iter = draw(helpers.ints(min_value=2, max_value=5))
+    seed = 0
+
+    return (x, n_dims, n_iter, seed)
+
+
+@handle_test(
+    fn_tree="functional.ivy.experimental.randomized_range_finder",
+    data=_randomized_range_finder_data(),
+    test_with_out=st.just(False),
+)
+def test_randomized_range_finder(*, data, test_flags, backend_fw, fn_name, on_device):
+    (x, n_dims, n_iter, seed) = data
+    return helpers.test_function(
+        backend_to_test=backend_fw,
+        test_flags=test_flags,
+        fn_name=fn_name,
+        on_device=on_device,
+        x=x,
+        n_dims=n_dims,
+        n_iter=n_iter,
+        seed=seed,
+    )

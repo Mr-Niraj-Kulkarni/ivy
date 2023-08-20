@@ -1666,3 +1666,55 @@ def dot(
     ivy.array([[-15.28]])
     """
     return current_backend(a, b).dot(a, b, out=out)
+
+
+@handle_nestable
+@handle_exceptions
+@handle_array_like_without_promotion
+@inputs_to_ivy_arrays
+@handle_array_function
+@handle_device_shifting
+def randomized_range_finder(
+    A: Union[ivy.Array, ivy.NativeArray],
+    /,
+    *,
+    n_dims: Optional[int],
+    n_iter: Optional[int] = 2,
+    seed: Optional[int] = None,
+):
+    """
+    Compute an orthonormal matrix (Q) whose range approximates the range of A,  i.e., Q
+    Q^H A ≈ A.
+
+    Parameters
+    ----------
+    A : 2D-array
+    n_dims : int, dimension of the returned subspace
+    n_iter : int, number of power iterations to conduct (default = 2)
+    random_state: {None, int, np.random.RandomState}
+
+    Returns
+    -------
+    Q : 2D-array
+        of shape (A.shape[0], min(n_dims, A.shape[0], A.shape[1]))
+
+    References
+    ----------
+    This function is implemented based on Algorith 4.4 in `Finding structure
+    with randomness:Probabilistic algorithms for constructing approximate
+    matrix decompositions` - Halko et al (2009)
+    """
+    dim_1, dim_2 = ivy.shape(A)
+    Q = ivy.random_uniform(
+        shape=(dim_2, n_dims),
+        dtype=A.dtype,
+        seed=seed,
+    )
+    Q, _ = ivy.qr(ivy.dot(A, Q))
+
+    A_H = ivy.conj(ivy.permute_dims(A, (1, 0)))
+    for i in range(n_iter):
+        Q, _ = ivy.qr(ivy.dot(A_H, Q))
+        Q, _ = ivy.qr(ivy.dot(A, Q))
+
+    return Q
