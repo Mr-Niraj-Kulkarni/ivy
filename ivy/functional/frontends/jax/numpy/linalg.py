@@ -126,8 +126,3 @@ def tensorinv(a, ind=2):
 @to_ivy_arrays_and_back
 def cond(x, p=None):
     return ivy.cond(x, p=p)
-
-
-@to_ivy_arrays_and_back
-def multi_dot(arrays):
-    return ivy.multi_dot(arrays)
