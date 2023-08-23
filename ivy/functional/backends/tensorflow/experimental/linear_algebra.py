@@ -210,7 +210,7 @@ def dot(
     *,
     out: Optional[tf.Tensor] = None,
 ) -> tf.Tensor:
-    return tf.tensordot(a, b, out=out)
+    return tf.tensordot(a, b, 0)
 
 
 dot.support_native_out = True

@@ -1614,22 +1614,23 @@ def test_tucker_tensorly(tol_norm_2, tol_max_abs, shape, ranks):
 
 @st.composite
 def _randomized_range_finder_data(draw):
-    _, x = draw(
+    x_dtype, x, shape = draw(
         helpers.dtype_and_values(
-            dtypes=["float32"],
+            available_dtypes=helpers.get_dtypes("float"),
             min_num_dims=2,
             max_num_dims=2,
             min_dim_size=2,
-            max_dim_size=6,
-            min_value=0.2,
+            max_dim_size=5,
+            min_value=0.1,
             max_value=10.0,
+            ret_shape=True,
         )
     )
-    n_dims = draw(helpers.ints(min_value=2, max_value=5))
-    n_iter = draw(helpers.ints(min_value=2, max_value=5))
+    n_dims = draw(helpers.ints(min_value=2))
+    n_iter = draw(helpers.ints(min_value=2))
     seed = 0
 
-    return (x, n_dims, n_iter, seed)
+    return (x_dtype, x[0], n_dims, n_iter, seed)
 
 
 @handle_test(
@@ -1638,14 +1639,18 @@ def _randomized_range_finder_data(draw):
     test_with_out=st.just(False),
 )
 def test_randomized_range_finder(*, data, test_flags, backend_fw, fn_name, on_device):
-    (x, n_dims, n_iter, seed) = data
+    (input_dtypes, x, n_dims, n_iter, seed) = data
+
     return helpers.test_function(
         backend_to_test=backend_fw,
         test_flags=test_flags,
         fn_name=fn_name,
         on_device=on_device,
+        input_dtypes=input_dtypes,
         x=x,
         n_dims=n_dims,
         n_iter=n_iter,
         seed=seed,
+        test_values=False,
+        return_flat_np_arrays=True,
     )

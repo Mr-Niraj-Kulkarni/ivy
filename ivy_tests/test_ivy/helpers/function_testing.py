@@ -271,7 +271,6 @@ def test_function(
                 target_fn = instance.__getattribute__(fn_name)
         else:
             target_fn = ivy_backend.__dict__[fn_name]
-
         ret_from_target, ret_np_flat_from_target = get_ret_and_flattened_np_array(
             backend_to_test,
             target_fn,
@@ -375,6 +374,7 @@ def test_function(
             test_flags=test_flags,
             on_device=on_device,
         )
+
         ret_from_gt, ret_np_from_gt_flat = get_ret_and_flattened_np_array(
             test_flags.ground_truth_backend,
             gt_backend.__dict__[fn_name],

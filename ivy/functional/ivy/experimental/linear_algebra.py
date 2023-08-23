@@ -1680,8 +1680,8 @@ def randomized_range_finder(
     *,
     n_dims: Optional[int],
     n_iter: Optional[int] = 2,
-    seed: Optional[int] = None,
-):
+    seed: Optional[int] = 0,
+) -> Union[ivy.Array, ivy.NativeArray]:
     """
     Compute an orthonormal matrix (Q) whose range approximates the range of A,  i.e., Q
     Q^H A ≈ A.
