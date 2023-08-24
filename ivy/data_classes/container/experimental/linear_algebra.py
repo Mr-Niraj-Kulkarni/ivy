@@ -1892,31 +1892,48 @@ class _ContainerWithLinearAlgebraExperimental(ContainerBase):
 
     @staticmethod
     def static_randomized_range_finder(
-        A: Union[ivy.Array, ivy.NativeArray],
+        A: Union[ivy.Array, ivy.NativeArray, ivy.Container],
         /,
         *,
-        n_dims: Optional[int],
-        n_iter: Optional[int] = 2,
-        seed: Optional[int] = None,
-    ) -> ivy.Array:
+        n_dims: Optional[Union[int, ivy.Container]],
+        n_iter: Optional[Union[int, ivy.Container]] = 2,
+        seed: Optional[Union[int, ivy.Container]] = None,
+        out: Optional[Union[ivy.Array, ivy.Container]] = None,
+        key_chains: Optional[Union[List[str], Dict[str, str], ivy.Container]] = None,
+        to_apply: Union[bool, ivy.Container] = True,
+        prune_unapplied: Union[bool, ivy.Container] = False,
+        map_sequences: Union[bool, ivy.Container] = False,
+    ) -> Union[ivy.Array, ivy.NativeArray, ivy.Container]:
         """
         Compute an orthonormal matrix (Q) whose range approximates the range of A, i.e.,
         Q Q^H A ≈ A.
 
         Parameters
         ----------
-        A : 2D-array
-        n_dims : int, dimension of the returned subspace
-        n_iter : int, number of power iterations to conduct (default = 2)
-        random_state: {None, int, np.random.RandomState}
+        A
+          2D-array
+        n_dims
+          int, dimension of the returned subspace
+        n_iter
+          int, number of power iterations to conduct (default = 2)
+        seed
+          {None, int, np.random.RandomState}
 
         Returns
         -------
-        Q : 2D-array
-            of shape (A.shape[0], min(n_dims, A.shape[0], A.shape[1]))
+         2D-array of shape (A.shape[0], min(n_dims, A.shape[0], A.shape[1]))
         """
         return ContainerBase.cont_multi_map_in_function(
-            "randomized_range_finder", A, n_dims=n_dims, n_iter=n_iter, seed=seed
+            "randomized_range_finder",
+            A,
+            n_dims=n_dims,
+            n_iter=n_iter,
+            seed=seed,
+            out=out,
+            key_chains=key_chains,
+            to_apply=to_apply,
+            prune_unapplied=prune_unapplied,
+            map_sequences=map_sequences,
         )
 
     def randomized_range_finder(
@@ -1926,23 +1943,39 @@ class _ContainerWithLinearAlgebraExperimental(ContainerBase):
         n_dims: Optional[int],
         n_iter: Optional[int] = 2,
         seed: Optional[int] = None,
-    ) -> ivy.Array:
+        out: Optional[Union[ivy.Array, ivy.Container]] = None,
+        key_chains: Optional[Union[List[str], Dict[str, str], ivy.Container]] = None,
+        to_apply: Union[bool, ivy.Container] = True,
+        prune_unapplied: Union[bool, ivy.Container] = False,
+        map_sequences: Union[bool, ivy.Container] = False,
+    ) -> Union[ivy.Array, ivy.NativeArray, ivy.Container]:
         """
         Compute an orthonormal matrix (Q) whose range approximates the range of A, i.e.,
         Q Q^H A ≈ A.
 
         Parameters
         ----------
-        A : 2D-array
-        n_dims : int, dimension of the returned subspace
-        n_iter : int, number of power iterations to conduct (default = 2)
-        random_state: {None, int, np.random.RandomState}
+        A
+          2D-array
+        n_dims
+          int, dimension of the returned subspace
+        n_iter
+          int, number of power iterations to conduct (default = 2)
+        seed
+          {None, int, np.random.RandomState}
 
         Returns
         -------
-        Q : 2D-array
-            of shape (A.shape[0], min(n_dims, A.shape[0], A.shape[1]))
+           2D-array of shape (A.shape[0], min(n_dims, A.shape[0], A.shape[1]))
         """
         return self.static_randomized_range_finder(
-            self, n_dims=n_dims, n_iter=n_iter, seed=seed
+            self,
+            n_dims=n_dims,
+            n_iter=n_iter,
+            seed=seed,
+            out=out,
+            key_chains=key_chains,
+            to_apply=to_apply,
+            prune_unapplied=prune_unapplied,
+            map_sequences=map_sequences,
         )

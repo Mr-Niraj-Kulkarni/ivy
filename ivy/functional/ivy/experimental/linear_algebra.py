@@ -1681,6 +1681,7 @@ def randomized_range_finder(
     n_dims: Optional[int],
     n_iter: Optional[int] = 2,
     seed: Optional[int] = 0,
+    out: Optional[Union[ivy.Array, ivy.Container]] = None,
 ) -> Union[ivy.Array, ivy.NativeArray]:
     """
     Compute an orthonormal matrix (Q) whose range approximates the range of A,  i.e., Q
@@ -1688,15 +1689,18 @@ def randomized_range_finder(
 
     Parameters
     ----------
-    A : 2D-array
-    n_dims : int, dimension of the returned subspace
-    n_iter : int, number of power iterations to conduct (default = 2)
-    random_state: {None, int, np.random.RandomState}
+    A
+      2D-array
+    n_dims
+      int, dimension of the returned subspace
+    n_iter
+      int, number of power iterations to conduct (default = 2)
+    random_state
+      {None, int, np.random.RandomState}
 
     Returns
     -------
-    Q : 2D-array
-        of shape (A.shape[0], min(n_dims, A.shape[0], A.shape[1]))
+      2D-array of shape (A.shape[0], min(n_dims, A.shape[0], A.shape[1]))
 
     References
     ----------
