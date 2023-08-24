@@ -678,9 +678,9 @@ class _ArrayWithLinearAlgebraExperimental(abc.ABC):
 
     def randomized_range_finder(
         self: Union[ivy.Array, ivy.NativeArray],
+        n_dims: Sequence[int],
         /,
         *,
-        n_dims: Optional[int],
         n_iter: Optional[int] = 2,
         seed: Optional[int] = None,
         out: Optional[ivy.Array] = None,
@@ -704,4 +704,6 @@ class _ArrayWithLinearAlgebraExperimental(abc.ABC):
         -------
             2D-array of shape (A.shape[0], min(n_dims, A.shape[0], A.shape[1]))
         """
-        return ivy.randomized_range_finder(self._data, n_dims, n_iter, seed, out=out)
+        return ivy.randomized_range_finder(
+            self._data, n_dims, n_iter=n_iter, seed=seed, out=out
+        )

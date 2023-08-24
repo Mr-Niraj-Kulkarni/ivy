@@ -1893,9 +1893,9 @@ class _ContainerWithLinearAlgebraExperimental(ContainerBase):
     @staticmethod
     def static_randomized_range_finder(
         A: Union[ivy.Array, ivy.NativeArray, ivy.Container],
+        n_dims: Sequence[Union[int, ivy.Container]],
         /,
         *,
-        n_dims: Optional[Union[int, ivy.Container]],
         n_iter: Optional[Union[int, ivy.Container]] = 2,
         seed: Optional[Union[int, ivy.Container]] = None,
         out: Optional[Union[ivy.Array, ivy.Container]] = None,
@@ -1926,7 +1926,7 @@ class _ContainerWithLinearAlgebraExperimental(ContainerBase):
         return ContainerBase.cont_multi_map_in_function(
             "randomized_range_finder",
             A,
-            n_dims=n_dims,
+            n_dims,
             n_iter=n_iter,
             seed=seed,
             out=out,
@@ -1938,9 +1938,9 @@ class _ContainerWithLinearAlgebraExperimental(ContainerBase):
 
     def randomized_range_finder(
         self: Union[ivy.Array, ivy.NativeArray, ivy.Container],
+        n_dims: Sequence[Union[int, ivy.Container]],
         /,
         *,
-        n_dims: Optional[Union[int, ivy.Container]],
         n_iter: Optional[Union[int, ivy.Container]] = 2,
         seed: Optional[Union[int, ivy.Container]] = None,
         out: Optional[Union[ivy.Array, ivy.Container]] = None,
@@ -1970,7 +1970,7 @@ class _ContainerWithLinearAlgebraExperimental(ContainerBase):
         """
         return self.static_randomized_range_finder(
             self,
-            n_dims=n_dims,
+            n_dims,
             n_iter=n_iter,
             seed=seed,
             out=out,

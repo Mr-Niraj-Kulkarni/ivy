@@ -382,6 +382,7 @@ def test_function(
             test_compile=test_flags.test_compile,
             **kwargs,
         )
+
         if test_flags.with_out and not test_flags.test_compile:
             test_ret_from_gt = (
                 ret_from_gt[getattr(gt_backend.__dict__[fn_name], "out_index")]

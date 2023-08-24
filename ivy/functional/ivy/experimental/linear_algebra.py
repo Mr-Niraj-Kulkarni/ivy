@@ -1676,9 +1676,9 @@ def dot(
 @handle_device_shifting
 def randomized_range_finder(
     A: Union[ivy.Array, ivy.NativeArray],
+    n_dims: Sequence[int],
     /,
     *,
-    n_dims: Optional[int],
     n_iter: Optional[int] = 2,
     seed: Optional[int] = 0,
     out: Optional[Union[ivy.Array, ivy.Container]] = None,

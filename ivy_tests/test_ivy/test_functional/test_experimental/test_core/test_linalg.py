@@ -1637,11 +1637,11 @@ def _randomized_range_finder_data(draw):
     fn_tree="functional.ivy.experimental.randomized_range_finder",
     data=_randomized_range_finder_data(),
     test_with_out=st.just(False),
+    ground_truth_backend="numpy",
 )
 def test_randomized_range_finder(*, data, test_flags, backend_fw, fn_name, on_device):
     (input_dtypes, x, n_dims, n_iter, seed) = data
-
-    return helpers.test_function(
+    results = helpers.test_function(
         backend_to_test=backend_fw,
         test_flags=test_flags,
         fn_name=fn_name,
@@ -1653,4 +1653,17 @@ def test_randomized_range_finder(*, data, test_flags, backend_fw, fn_name, on_de
         seed=seed,
         test_values=False,
         return_flat_np_arrays=True,
+    )
+    if results is None:
+        return
+
+    ret_target, ret_gt = results
+    assert ret_target[0].shape == (x.shape[0], min(n_dims, x.shape[0], x.shape[1]))
+    assert ret_target[0].shape == ret_gt[0].shape
+    helpers.assert_all_close(
+        ret_target[0],
+        ret_gt[0],
+        atol=0.005,
+        backend=backend_fw,
+        ground_truth_backend=test_flags.ground_truth_backend,
     )
