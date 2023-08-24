@@ -1937,12 +1937,12 @@ class _ContainerWithLinearAlgebraExperimental(ContainerBase):
         )
 
     def randomized_range_finder(
-        self: Union[ivy.Array, ivy.NativeArray],
+        self: Union[ivy.Array, ivy.NativeArray, ivy.Container],
         /,
         *,
-        n_dims: Optional[int],
-        n_iter: Optional[int] = 2,
-        seed: Optional[int] = None,
+        n_dims: Optional[Union[int, ivy.Container]],
+        n_iter: Optional[Union[int, ivy.Container]] = 2,
+        seed: Optional[Union[int, ivy.Container]] = None,
         out: Optional[Union[ivy.Array, ivy.Container]] = None,
         key_chains: Optional[Union[List[str], Dict[str, str], ivy.Container]] = None,
         to_apply: Union[bool, ivy.Container] = True,
