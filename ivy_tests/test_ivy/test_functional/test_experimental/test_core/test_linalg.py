@@ -1656,7 +1656,6 @@ def test_randomized_range_finder(*, data, test_flags, backend_fw, fn_name, on_de
     )
     if results is None:
         return
-
     ret_target, ret_gt = results
     assert ret_target[0].shape == (x.shape[0], min(n_dims, x.shape[0], x.shape[1]))
     assert ret_target[0].shape == ret_gt[0].shape
