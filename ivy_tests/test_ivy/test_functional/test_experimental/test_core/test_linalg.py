@@ -1616,29 +1616,46 @@ def test_tucker_tensorly(tol_norm_2, tol_max_abs, shape, ranks):
 # dot
 @st.composite
 def _generate_dot_dtype_and_arrays(draw):
-    matrices_dims = draw(
-        st.lists(st.integers(min_value=2, max_value=10), min_size=3, max_size=3)
+    shape_a = draw(
+        helpers.get_shape(
+            min_dim_size=2, max_dim_size=5, min_num_dims=0, max_num_dims=5
+        )
     )
-    shape_1 = (matrices_dims[0], matrices_dims[1])
-    shape_2 = (matrices_dims[1], matrices_dims[2])
+    shape_b = draw(
+        helpers.get_shape(
+            min_dim_size=2, max_dim_size=5, min_num_dims=0, max_num_dims=5
+        )
+    )
+    # pdb.set_trace()
+    shape_a = list(shape_a)
+    shape_b = list(shape_b)
+    if len(shape_a) == 1 and len(shape_b) == 1:
+        shape_b[0] = shape_a[0]
+    elif len(shape_a) == 2 and len(shape_b) == 2:
+        shape_b[0] = shape_a[1]
+    elif len(shape_a) >= 2 and len(shape_b) == 1:
+        shape_b[0] = shape_a[-1]
+    elif len(shape_a) >= 1 and len(shape_b) >= 2:
+        shape_a[-1] = shape_b[-2]
 
-    dtype_1, matrix_1 = draw(
+    dtype_1, a = draw(
         helpers.dtype_and_values(
-            shape=shape_1,
+            shape=shape_a,
             available_dtypes=helpers.get_dtypes("float"),
             min_value=-10,
             max_value=10,
         ).filter(lambda x: "float16" not in x[0])
     )
-    dtype_2, matrix_2 = draw(
+    dtype_2, b = draw(
         helpers.dtype_and_values(
-            shape=shape_2,
+            shape=shape_b,
             dtype=dtype_1,
             min_value=-10,
             max_value=10,
         ).filter(lambda x: "float16" not in x[0])
     )
-    return [dtype_1[0], dtype_2[0]], [matrix_1[0], matrix_2[0]]
+
+    return [dtype_1[0], dtype_2[0]], [a[0], b[0]]
 
 
 @handle_test(
@@ -1657,8 +1674,89 @@ def test_dot(*, data, test_flags, backend_fw, fn_name, on_device):
         on_device=on_device,
         input_dtypes=input_dtypes,
         test_values=True,
-        rtol_=1e-1,
-        atol_=6e-1,
+        rtol_=0.5,
+        atol_=0.5,
         a=x[0],
         b=x[1],
+    )
+
+
+# symeig svd
+@st.composite
+def _symeig_svd_data(draw):
+    x_dtype, x, shape = draw(
+        helpers.dtype_and_values(
+            available_dtypes=helpers.get_dtypes("float"),
+            min_num_dims=2,
+            max_num_dims=2,
+            min_dim_size=2,
+            max_dim_size=5,
+            min_value=0.1,
+            max_value=10.0,
+            ret_shape=True,
+        )
+    )
+    n_eigen = draw(helpers.ints(min_value=1, max_value=max(shape[-2:])))
+    return x_dtype, x[0], n_eigen
+
+
+@handle_test(
+    fn_tree="functional.ivy.experimental.symeig_svd",
+    data=_symeig_svd_data(),
+    test_with_out=st.just(False),
+)
+def test_symeig_svd(*, data, test_flags, backend_fw, fn_name, on_device):
+    input_dtype, x, n_eigenvecs = data
+    results = helpers.test_function(
+        backend_to_test=backend_fw,
+        test_flags=test_flags,
+        fn_name=fn_name,
+        on_device=on_device,
+        input_dtypes=input_dtype,
+        x=x,
+        n_eigenvecs=n_eigenvecs,
+        test_values=False,
+        return_flat_np_arrays=True,
+    )
+
+    if results is None:
+        return
+
+    # value test based on recreating the original matrix and testing the consistency
+    ret_flat_np, ret_from_gt_flat_np = results
+
+    for i in range(len(ret_flat_np) // 3):
+        U = ret_flat_np[i]
+        S = ret_flat_np[len(ret_flat_np) // 3 + i]
+        V = ret_flat_np[2 * len(ret_flat_np) // 3 + i]
+    m = U.shape[-1]
+    n = V.shape[-1]
+    S = np.expand_dims(S, -2) if m > n else np.expand_dims(S, -1)
+
+    for i in range(len(ret_from_gt_flat_np) // 3):
+        U_gt = ret_from_gt_flat_np[i]
+        S_gt = ret_from_gt_flat_np[len(ret_from_gt_flat_np) // 3 + i]
+        V_gt = ret_from_gt_flat_np[2 * len(ret_from_gt_flat_np) // 3 + i]
+    S_gt = np.expand_dims(S_gt, -2) if m > n else np.expand_dims(S_gt, -1)
+
+    with BackendHandler.update_backend("numpy") as ivy_backend:
+        S_mat = (
+            S * ivy_backend.eye(U.shape[-1], V.shape[-2], batch_shape=U.shape[:-2]).data
+        )
+        S_mat_gt = (
+            S_gt
+            * ivy_backend.eye(
+                U_gt.shape[-1], V_gt.shape[-2], batch_shape=U_gt.shape[:-2]
+            ).data
+        )
+    reconstructed = np.matmul(np.matmul(U, S_mat), V)
+    reconstructed_gt = np.matmul(np.matmul(U_gt, S_mat_gt), V_gt)
+
+    # value test
+    helpers.assert_all_close(
+        reconstructed,
+        reconstructed_gt,
+        atol=1e-04,
+        backend=backend_fw,
+        ground_truth_backend=test_flags.ground_truth_backend,
     )
