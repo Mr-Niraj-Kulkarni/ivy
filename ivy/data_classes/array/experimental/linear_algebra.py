@@ -728,3 +728,29 @@ class _ArrayWithLinearAlgebraExperimental(abc.ABC):
         ivy.array([[-15.28]])
         """
         return ivy.dot(self._data, b, out=out)
+
+    def symeig_svd(
+        self: Union[ivy.Array, ivy.NativeArray],
+        /,
+        *,
+        n_eigenvecs: Optional[int] = None,
+    ) -> Union[ivy.Array, Tuple[ivy.Array, ivy.Array, ivy.Array]]:
+        """
+        Compute a truncated SVD on `matrix` using symeig Uses symeig on
+        matrix.T.dot(matrix) or its transpose.
+
+        Parameters
+        ----------
+        self
+            2D-array
+        n_eigenvecs
+            int, optional, default is None
+            if specified, number of eigen[vectors-values] to return
+
+
+        Returns
+        -------
+            a namedtuple ``(U, S, Vh)``
+            Each returned array must have the same floating-point data type as ``x``
+        """
+        return ivy.symeig_svd(self._data, n_eigenvecs=n_eigenvecs)

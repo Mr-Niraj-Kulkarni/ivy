@@ -1667,3 +1667,54 @@ def dot(
     ivy.array([[-15.28]])
     """
     return current_backend(a, b).dot(a, b, out=out)
+
+
+def symeig_svd(
+    x: Union[ivy.Array, ivy.NativeArray],
+    /,
+    *,
+    n_eigenvecs: Optional[int] = None,
+) -> Union[ivy.Array, Tuple[ivy.Array, ivy.Array, ivy.Array]]:
+    """
+    Compute a truncated SVD on `matrix` using symeig Uses symeig on matrix.T.dot(matrix)
+    or its transpose.
+
+    Parameters
+    ----------
+    self
+        2D-array
+    n_eigenvecs
+        int, optional, default is None
+        if specified, number of eigen[vectors-values] to return
+
+
+    Returns
+    -------
+        a namedtuple ``(U, S, Vh)``
+        Each returned array must have the same floating-point data type as ``x``
+    """
+    n_eigenvecs, _, _ = ivy.svd_checks(x, n_eigenvecs=n_eigenvecs)
+
+    dim_1, dim_2 = ivy.shape(x)
+
+    if dim_1 > dim_2:
+        S, U = ivy.eigh(ivy.dot(x, ivy.transpose(x)))
+        eps_S = ivy.finfo(S.dtype).min
+        S = ivy.sqrt(ivy.clip(S, eps_S))
+        V = ivy.dot(ivy.permute_dims(x, (1, 0)), U / ivy.reshape(S, (1, -1)))
+    else:
+        S, V = ivy.eigh(ivy.dot(ivy.permute_dims(x, (1, 0)), x))
+        eps_S = ivy.finfo(S.dtype).min
+        S = ivy.sqrt(ivy.clip(S, eps_S))
+        U = ivy.dot(x, V) / ivy.reshape(S, (1, -1))
+
+    U, S, V = (
+        ivy.flip(U, axis=1),
+        ivy.flip(S),
+        ivy.flip(ivy.permute_dims(V, (1, 0)), axis=0),
+    )
+    return (
+        U[:, : min(dim_1, n_eigenvecs)],
+        S[: min(dim_1, dim_2, n_eigenvecs)],
+        V[: min(dim_2, n_eigenvecs), :],
+    )

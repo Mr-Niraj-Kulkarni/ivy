@@ -2021,3 +2021,79 @@ class _ContainerWithLinearAlgebraExperimental(ContainerBase):
             prune_unapplied=prune_unapplied,
             map_sequences=map_sequences,
         )
+
+    @staticmethod
+    def static_symeig_svd(
+        x: Union[ivy.Array, ivy.NativeArray, ivy.Container],
+        /,
+        n_eigenvecs: Optional[Union[int, ivy.Container]] = None,
+        *,
+        key_chains: Optional[Union[List[str], Dict[str, str], ivy.Container]] = None,
+        to_apply: Union[bool, ivy.Container] = True,
+        prune_unapplied: Union[bool, ivy.Container] = False,
+        map_sequences: Union[bool, ivy.Container] = False,
+    ) -> Union[ivy.Container, Tuple[ivy.Container, ivy.Container, ivy.Container]]:
+        """
+        Compute a truncated SVD on `matrix` using symeig Uses symeig on
+        matrix.T.dot(matrix) or its transpose.
+
+        Parameters
+        ----------
+        matrix
+            2D-array
+        n_eigenvecs
+            int, optional, default is None
+            if specified, number of eigen[vectors-values] to return
+
+
+        Returns
+        -------
+            a namedtuple ``(U, S, Vh)``
+            Each returned array must have the same floating-point data type as ``x``
+        """
+        return ContainerBase.cont_multi_map_in_function(
+            "symeig_svd",
+            x,
+            n_eigenvecs,
+            key_chains=key_chains,
+            to_apply=to_apply,
+            prune_unapplied=prune_unapplied,
+            map_sequences=map_sequences,
+        )
+
+    def symeig_svd(
+        self: Union[ivy.Array, ivy.NativeArray, ivy.Container],
+        /,
+        n_eigenvecs: Optional[Union[int, ivy.Container]] = None,
+        *,
+        key_chains: Optional[Union[List[str], Dict[str, str], ivy.Container]] = None,
+        to_apply: Union[bool, ivy.Container] = True,
+        prune_unapplied: Union[bool, ivy.Container] = False,
+        map_sequences: Union[bool, ivy.Container] = False,
+    ) -> Union[ivy.Container, Tuple[ivy.Container, ivy.Container, ivy.Container]]:
+        """
+        Compute a truncated SVD on x using symeig Uses symeig on matrix.T.dot(x) or its
+        transpose.
+
+        Parameters
+        ----------
+        self
+            2D-array
+        n_eigenvecs
+            int, optional, default is None
+            if specified, number of eigen[vectors-values] to return
+
+
+        Returns
+        -------
+            a namedtuple ``(U, S, Vh)``
+            Each returned array must have the same floating-point data type as ``x``
+        """
+        return self.static_symeig_svd(
+            self,
+            n_eigenvecs,
+            key_chains=key_chains,
+            to_apply=to_apply,
+            prune_unapplied=prune_unapplied,
+            map_sequences=map_sequences,
+        )
